@@ -24,4 +24,4 @@ streamlit run app.py
 
 ## Demo
 
-![Demo](screenshot.png)
+![Demo](screenshot_of_model_output.png)
