@@ -5,7 +5,7 @@ import tensorflow as tf
 from PIL import Image
 
 # Loading the tflite model
-model_path = "App/main.tflite"
+model_path = "main.tflite"
 interpreter = tf.lite.Interpreter(model_path=model_path)
 interpreter.allocate_tensors()
 
@@ -49,16 +49,28 @@ with col1:
             predictions = interpreter.get_tensor(output_details[0]['index'])
             predicted_class_index = np.argmax(predictions, axis=1)
             predicted_class_name = class_names[predicted_class_index[0]]
-            confidence = float(predictions[0][predicted_class_index[0]]) * 100
-            return predicted_class_name, confidence
+            covid_prob = float(predictions[0][0]) * 100
+            pneumonia_prob = float(predictions[0][1]) * 100
+            normal_prob = float(predictions[0][2]) * 100
+            return (predicted_class_name, covid_prob, pneumonia_prob, normal_prob)
 
         # Predict Now button
         if st.button('Predict Now'):
-            predicted_class_name, confidence = predict(image)
+            predicted_class_name, covid_prob, pneumonia_prob, normal_prob = predict(image)
             # Display prediction as a heading in bold font
-            st.markdown(f"""<h2>Classified as: <span style='font-style: italic; font-weight: bold;'>{predicted_class_name}</span></h2> <h3>confidence: {confidence: .2f}% </h3>""", unsafe_allow_html=True)
+            st.markdown(f"""<h2>Classified as: <span style='font-style: italic; font-weight: bold;'>{predicted_class_name}</span></h2>""", unsafe_allow_html=True)
+            st.subheader("Confidence Scores")
+
+            st.write(f"Covid: {covid_prob:.2f}%")
+            st.progress(int(covid_prob))
+
+            st.write(f"Viral Pneumonia: {pneumonia_prob:.2f}%")
+            st.progress(int(pneumonia_prob))
+
+            st.write(f"Normal: {normal_prob:.2f}%")
+            st.progress(int(normal_prob))
 
 # Display uploaded image
 with col2:
     if uploaded_file is not None:
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        st.image(image, caption="Uploaded Image", width="stretch")
